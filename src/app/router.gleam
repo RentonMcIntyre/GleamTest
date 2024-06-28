@@ -19,6 +19,7 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
       |> wisp.html_response(200)
     }
     ["items"] -> {
+      use <- wisp.require_method(req, http.Get)
       items.todos(ctx.items)
       |> element.to_document_string_builder
       |> wisp.html_response(200)
@@ -26,6 +27,10 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
     ["items", "create"] -> {
       use <- wisp.require_method(req, http.Post)
       item_routes.post_create_item(req, ctx)
+    }
+    ["items", "toggle", id] -> {
+      use <- wisp.require_method(req, http.Get)
+      item_routes.toggle_completion(req, id, ctx)
     }
     ["internal-server-error"] -> wisp.internal_server_error()
     ["unprocessable-entity"] -> wisp.unprocessable_entity()

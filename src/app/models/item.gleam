@@ -14,7 +14,7 @@ pub fn create_item(id: Option(String), title: String, completed: Bool) -> Item {
   let id = option.unwrap(id, wisp.random_string(64))
   case completed {
     True -> Item(id, title, status: Completed)
-    False -> Item(id, title, status: Completed)
+    False -> Item(id, title, status: Uncompleted)
   }
 }
 

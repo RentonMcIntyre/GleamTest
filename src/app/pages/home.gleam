@@ -24,7 +24,9 @@ pub fn todo_input() -> Element(t) {
         attribute.class("rounded-2xl p-2"),
         attribute.id("todo_title"),
         attribute.name("todo_title"),
-        attribute.attribute("type", "text")
+        attribute.attribute("type", "text"),
+        attribute.attribute("min-length", "1"),
+        attribute.attribute("hx-validate", "true")
       ]),
       button([
         attribute.class("rounded-2xl bg-teal-700 text-white p-2"),

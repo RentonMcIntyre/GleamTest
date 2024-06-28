@@ -2,9 +2,7 @@ import app/models/item.{type Item, create_item}
 import app/web.{type Context, Context}
 import gleam/dynamic
 import gleam/json
-import gleam/pair
 import gleam/list
-import gleam/io
 import gleam/option.{Some, None}
 import gleam/result
 import gleam/string
@@ -42,18 +40,9 @@ pub fn items_middleware(
   }
 
   let items = create_items_from_json(parsed_items)
-  
   let ctx = Context(..ctx, items: items)
 
   handle_request(ctx)
-}
-
-fn create_items_from_json(items: List(ItemsJson)) -> List(Item) {
-  items
-  |> list.map(fn(item) {
-      let ItemsJson(id, title, completed) = item
-      create_item(Some(id), title, completed)
-    })
 }
 
 pub fn post_create_item(req: Request, ctx: Context) {
@@ -77,6 +66,37 @@ pub fn post_create_item(req: Request, ctx: Context) {
       wisp.bad_request()
     }
   }
+}
+
+pub fn toggle_completion(req: Request, id: String, ctx: Context) {
+  let result = {
+    list.map(ctx.items, fn(target_item) {
+      case target_item.id == id {
+        True -> item.toggle_todo(target_item)
+        False -> target_item
+      }
+    })
+    |> todos_to_json
+    |> Ok
+  }
+
+  case result {
+    Ok(todos) -> {
+      wisp.redirect("/items")
+      |> wisp.set_cookie(req, "items", todos, wisp.PlainText, 60 * 60 * 24)
+    }
+    Error(_) -> {
+      wisp.bad_request()
+    }
+  }
+} 
+
+fn create_items_from_json(items: List(ItemsJson)) -> List(Item) {
+  items
+  |> list.map(fn(item) {
+      let ItemsJson(id, title, completed) = item
+      create_item(Some(id), title, completed)
+    })
 }
 
 fn todos_to_json(items: List(Item)) -> String {
