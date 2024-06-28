@@ -1,0 +1,15 @@
+meta {
+  name: Items
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{origin}}/items/create
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  todo_title: New Todo
+}

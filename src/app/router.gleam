@@ -1,12 +1,15 @@
+import app/components/items
 import app/pages
 import app/pages/layout.{layout}
+import app/routes/item_routes.{items_middleware}
 import app/web.{type Context}
 import lustre/element
-import gleam/string_builder
+import gleam/http
 import wisp.{type Request, type Response}
 
 pub fn handle_request(req: Request, ctx: Context) -> Response {
-  use _req <- web.middleware(req, ctx)
+  use req <- web.middleware(req, ctx)
+  use ctx <- items_middleware(req, ctx)
 
   case wisp.path_segments(req) {
     [] -> {
@@ -15,7 +18,15 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
       |> element.to_document_string_builder
       |> wisp.html_response(200)
     }
-
+    ["items"] -> {
+      items.todos(ctx.items)
+      |> element.to_document_string_builder
+      |> wisp.html_response(200)
+    }
+    ["items", "create"] -> {
+      use <- wisp.require_method(req, http.Post)
+      item_routes.post_create_item(req, ctx)
+    }
     ["internal-server-error"] -> wisp.internal_server_error()
     ["unprocessable-entity"] -> wisp.unprocessable_entity()
     ["method-not-allowed"] -> wisp.method_not_allowed([])
